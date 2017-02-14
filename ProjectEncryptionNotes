@@ -1,0 +1,22 @@
+RSA notes
+- create RSA object
+- using sso library, generate public and private key
+  - use public key to encrypt and private key to decrypt
+
+Symmetric Keys
+- create an AES object
+  - generate a key of 256 bytes by downloading a Pseudo-RNG
+  - generate two keys
+    - use one for AES
+    - use other for edge map
+
+HMACKey [64b]
+AESKey  [64b]
+
+Encryption
+RSAPlain = AESkey + Hmackey
+RSA.defined(RSACipher, RSAPlain...)
+
+Decryption
+RSA.doFinal(RSAPlain, RSACipher...)
+split(RSAPlain)
