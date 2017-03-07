@@ -68,11 +68,22 @@ public class Main {
 		// SHA 256 ciphertext for integrity tag
 		
 		
+		// concatenating keys for RSA
+		byte[] AESbytes = AESkey.getEncoded();
+		byte[] HMACbytes = HMACkey.getEncoded();
+		byte[] AESandHMAC = new byte[AESbytes.length + HMACbytes.length];
+		for(int i = 0; i < AESbytes.length; i++){
+			AESandHMAC[i] = AESbytes[i];
+		}
+		for(int i = 0; i < HMACbytes.length; i++){
+			AESandHMAC[AESbytes.length + i] = HMACbytes[i];
+		}
+		
 		// encrypt AES key + HMAC key with RSA
 		try{
 			Cipher rsa = Cipher.getInstance("RSA");
 			rsa.init(Cipher.ENCRYPT_MODE, pubKey);
-			byte[] ciphertext = rsa.doFinal(AESkey.getEncoded() + HMACkey.getEncoded());
+			byte[] ciphertext = rsa.doFinal(AESandHMAC);
 		} catch (Exception e){
 			e.printStackTrace();
 		}
