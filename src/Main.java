@@ -30,42 +30,38 @@ public class Main {
 		//JSONObject json = encrypt(message, );
 	}
 	
-	private static JSONObject encrypt(String message, PublicKey pubKey){
+	private static JSONObject encrypt(String message, PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
 		JSONObject json = new JSONObject();
 		byte[] AESciphertext = null;
 		byte[] HMACtag = null;
 		SecretKey AESkey = null;
 		SecretKeySpec HMACkey = null;
 		
+		
 		// generate AES key
-		try
-		{
-			KeyGenerator AESKeyGen = KeyGenerator.getInstance("AES");
-			AESKeyGen.init(256);
-			AESkey = AESKeyGen.generateKey();
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("Error with AES.");
-		}
+		KeyGenerator AESKeyGen = KeyGenerator.getInstance("AES");
+		AESKeyGen.init(256);
+		AESkey = AESKeyGen.generateKey();
+		
 		
 		// encrypt message with AES + IV
-		try{
-			Cipher aes = Cipher.getInstance("AES");
-			aes.init(Cipher.ENCRYPT_MODE, AESkey);
-			AESciphertext = aes.doFinal(message.getBytes());
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+		Cipher aes = Cipher.getInstance("AES");
+		aes.init(Cipher.ENCRYPT_MODE, AESkey);
+		AESciphertext = aes.doFinal(message.getBytes());
 		
 		
 		//generate HMAC key
 		final int HMACkeysize = 32;
-
 		SecureRandom RNG = new SecureRandom();
 		byte[] random = new byte[HMACkeysize];
 		RNG.nextBytes(random);
+		HMACkey = new SecretKeySpec(random, "HmacSHA256");
 		
 		
 		// SHA 256 ciphertext for integrity tag
+		Mac hmac = Mac.getInstance("HmacSHA256");
+		hmac.init(HMACkey);
+		HMACtag = hmac.doFinal(AESciphertext);
 		
 		
 		// concatenating keys for RSA
@@ -79,6 +75,7 @@ public class Main {
 			AESandHMAC[AESbytes.length + i] = HMACbytes[i];
 		}
 		
+		
 		// encrypt AES key + HMAC key with RSA
 		try{
 			Cipher rsa = Cipher.getInstance("RSA");
@@ -87,6 +84,7 @@ public class Main {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
+		
 		
 		// output RSA ciphertext, AES ciphertext, and HMAC tag in JSON
 		return json;
