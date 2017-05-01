@@ -1,3 +1,6 @@
+"""
+    This class handles requests to create a new account, authenticate a user (for login), and refresh a token. When a user is authenticated, they are given an access token (JWT) and a refresh token. The access token has a shorter "freshness" period and will need to be replaced frequently, which can be done by passing the refresh token to the put request. On the other hand, the refresh token has a longer "freshness" period, so it will need to be stored securely. If it is ever stolen, an adversary may be able to impersonate a different user. 
+"""
 import sqlite3
 import json
 
