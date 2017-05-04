@@ -6,11 +6,14 @@ import hashlib
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required
 
+"""
+    This resource describes all the users in the application. All users have an email, username, password, and salt. The password is salted with the salt and hashed with SHA512 before it is stored.
+"""
 class User(Resource):
     TABLE_NAME = 'users'
 
     def __init__(self, **kwargs):
-        self._id = kwargs["_id"]
+        self.email = kwargs["email"]
         self.username = kwargs["username"]
         self.password = kwargs["password"]
         self.salt = kwargs["salt"]
@@ -22,50 +25,56 @@ class User(Resource):
         return self.__dict__
 
     def printUser(self):
-        print("id={}\nusername={}\npassword={}\nsalt={}".format(self._id, self.username, self.password,self.salt))
+        print("email={}\nusername={}\npassword={}\nsalt={}".format(self.email, self.username, self.password,self.salt))
 
     @classmethod
     def find_by_username(cls, username):
+        #connect to the database
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
+        #obtain the first user with the username
         query = "SELECT * FROM {table} WHERE username=?".format(table=cls.TABLE_NAME)
         result = cursor.execute(query, (username,))
         match = result.fetchone()
         if match:
-            #user = cls(*row)
-            _id = match[0]
+            #convert the result into a user object
+            email = match[0]
             username = match[1]
             password =match[2]
             salt = match[3]
 
-            user = User(_id=_id, username=username, password=password, salt=salt)
+            user = User(email=email, username=username, password=password, salt=salt)
             user.printUser()
         else:
             user = None
-
+        #close the connection to the database
         connection.close()
         return user
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_email(cls, email):
+        #connect to the database
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
-        query = "SELECT * FROM {table} WHERE _id=?".format(table=cls.TABLE_NAME)
-        result = cursor.execute(query, (_id,))
-        row = result.fetchone()
-        if row:
-            #user = cls(*row)
-            _id = row[0]
-            username = row[1]
-            password = row[2]
+        #obtain the first user with the email
+        query = "SELECT * FROM {table} WHERE email=?".format(table=cls.TABLE_NAME)
+        result = cursor.execute(query, (email,))
+        match = result.fetchone()
+        if match:
+            #convert the result into a user object
+            email = match[0]
+            username = match[1]
+            password =match[2]
+            salt = match[3]
 
-            user = User(_id=_id, username=username, password=password)
+            user = User(email=email, username=username, password=password, salt=salt)
             user.printUser()
         else:
             user = None
 
+        #close the connection to the database
         connection.close()
         return user
 
@@ -73,6 +82,10 @@ class UserRegister(Resource):
     TABLE_NAME = 'users'
 
     parser = reqparse.RequestParser()
+    parser.add_argument("email",
+        type=str,
+        required=False
+    )
     parser.add_argument('username',
         type=str,
         required=True,
@@ -88,15 +101,20 @@ class UserRegister(Resource):
         Registers a new user into the system
     """
     def post(self):
-        data = UserRegister.parser.parse_args() # TODO make sure the password is encrypted before sending
+        data = UserRegister.parser.parse_args()
 
+        #store data in variables
+        email = data["email"]
         username = data['username']
         password = data['password']
 
         if User.find_by_username(username): #check if a user with the same username already exits
-            return {"message": "User with that username already exists."}, 400
+            return {"message": "User with that username already exists. Please enter a new username."}, 400 #406  = not acceptable
 
-        #else connect to the database
+        if User.find_by_email(email): #check if a user with the same email already exists
+            return {"message": "That email is already in use. Please enter a new email address."}, 406 #406  = not acceptable
+
+        #connect to the database
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
@@ -107,8 +125,8 @@ class UserRegister(Resource):
         digest = sha512.digest()
 
         #add the user to the users table
-        query = "INSERT INTO {table} VALUES (NULL, ?, ?, ?)".format(table=self.TABLE_NAME)
-        cursor.execute(query, (username, str(digest), salt))
+        query = "INSERT INTO {table} VALUES (?, ?, ?, ?)".format(table=self.TABLE_NAME)
+        cursor.execute(query, (email, username, str(digest), salt))
         print("username = {}".format(username))
         print("digest = {}".format(digest))
         print("salt = {}".format(salt))
@@ -117,7 +135,7 @@ class UserRegister(Resource):
         connection.commit()
         connection.close()
 
-        return {"message": "User created successfully.", "username": data['username'], "password": data['password']}, 201
+        return {"message": "User created successfully.", "username": data['username']}, 201 #201 = created
 
 
 '''
@@ -127,25 +145,33 @@ class UserRegister(Resource):
     CLASS IS FOR TESTING PURPOSES ONLY
 '''
 class UserList(Resource):
+    """
+        This will return the list of users so we can confirm that the tables have been changed
+    """
     def get(self):
+        #connect to the database
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
+        #return the list of users
         query = "SELECT * FROM {}".format("users") #TABLE_NAME
         result = cursor.execute(query)
 
+        #store all users in a dict
         all_users = {}
         user_num = 0
         for row in result:
             key = "user_" + str(user_num)
             all_users[key] = {
-                "id" : row[0],
+                "email" : row[0],
                 "username" : row[1],
                 "password" : row[2],
                 "salt":row[3]
             }
             user_num = user_num + 1
 
+        #close connection to database
         connection.close()
 
-        return {"num_users": user_num, "all_users":all_users}
+        #return all user data
+        return {"num_users": user_num, "all_users":all_users}, 200 #200 = OK

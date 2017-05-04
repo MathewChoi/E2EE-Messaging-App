@@ -9,6 +9,9 @@ from flask_restful import Resource, reqparse
 
 from user import User
 
+"""
+    This class is used to: verify whether a user has the correct credentials to access an account, and refresh access tokens.
+"""
 class Authenticator(Resource):
     def __init__(self):
         pass
@@ -38,7 +41,7 @@ class Authenticator(Resource):
         return pass_match
 
     """
-        authenticates the user by comparing their username and password
+        Authenticates the user by comparing their username and password
     """
     def post(self):
         data = Authenticator.parser.parse_args()
@@ -51,7 +54,7 @@ class Authenticator(Resource):
         pass_match = Authenticator.compare_passwords(user, password)
 
         if pass_match is False:
-            return {"Message" : "invalid username or password"}, 401
+            return {"Message" : "invalid username or password"}, 401 #401 = unauthorized
 
         #set the JWT cookies in the responses
         resp = {
@@ -62,7 +65,7 @@ class Authenticator(Resource):
 
 
     """
-        generates a new access token for the user based off of their refresh token
+        Generates a new access token for the user based off of their refresh token
     """
     @jwt_refresh_token_required
     def put(self):
