@@ -10,13 +10,14 @@ import json
 class constants:
     url = 'http://127.0.0.1:5000'
 
-def register_user(url, username, password):
+def register_user(url, emaill, username, password):
     #setup the request route
     route = '/register'
     request_url = constants.url + route
     print("request_url = {}".format(request_url))
 
     data = {
+        'email' : email,
         'username' : username,
         'password' : password
     }
@@ -123,19 +124,26 @@ def print_all_users(url):
 """
     Driver
 """
-sender = username = "mathew"
+email = "detectivetim@gmail.com"
+sender = username = "tim"
 password = "choi"
 receiver = "ryan"
 receiver_pass = "riehl"
 ciphertext = "hey chump"
 
 # testing print_all_users
-#print('printing all users')
-#print_all_users(constants.url)
+print('printing all users')
+print_all_users(constants.url)
 
 #testing register_user
-#register_user(constants.url, "ryan", "riehl")
+register_user(constants.url, email, username, password)
 
+#testing print_all_users
+print('printing all users')
+print_all_users(constants.url)
+
+
+"""
 #testing auth_user
 print("testing user authentication")
 tokens = json.loads(auth_user(constants.url, username, password))
@@ -159,3 +167,4 @@ receiver_tokens = json.loads(auth_user(constants.url, receiver, receiver_pass))
 
 #testing get message
 get_msg = get_messages(constants.url, receiver, receiver_tokens['access token'])
+"""
