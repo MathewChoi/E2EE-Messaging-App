@@ -9,6 +9,8 @@ A great man once said, “Security is not an afterthought; it starts at design�
 
 ## Security Methodology
 
+![DigitalEnvelope.png](https://github.com/MathewChoi/E2EE-Messaging-App/blob/Picture4Wiki/DigitalEnvelope.png "Digital Envelope")
+
 Fig.1 - Overview of the “digital envelope” process.
 
 ### Digital Envelope
