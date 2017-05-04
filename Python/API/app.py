@@ -2,15 +2,13 @@ import json
 
 from flask import Flask, request
 from flask_restful import Api
-from flask_jwt_extended import JWTManager #, JWT_TOKEN_LOCATION
+from flask_jwt_extended import JWTManager
 
-from security import authenticate, identity
 from authenticate import Authenticator
 from user import UserRegister, UserList
 from message import Message, MessageList
 
 app = Flask(__name__)
-app.secret_key = 'jose' # need a stronger secret_key
 
 """
     Configuration of application
