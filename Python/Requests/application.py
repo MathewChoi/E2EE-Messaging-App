@@ -1,3 +1,4 @@
+from contacts import get_contacted_users, get_public_keys, get_private_keys, add_contact, create_contacts_list
 from make_requests import auth_user, register_user, refresh_token, send_message, get_messages, get_all_users, constants
 from pathlib import Path
 from cryptography.hazmat.backends import default_backend
@@ -39,58 +40,6 @@ def login_register():
             cont = False
         else:
             print("Invalid input. Please enter 1, 2, or 3.\n")
-
-def get_contacted_users(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_contacts.txt"
-    filepath = Path(filename)
-
-    #open and read files
-    if filepath.is_file():
-        contacted_file = open(filename)
-        for line in contacted_file:
-            session_user.contacted_users.append(line)
-        contacted_file.close()
-    else:
-        contacted_file = open(filename, "w")
-        contacted_file.close()
-
-def get_public_keys(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_publickeys.txt"
-    filepath = Path(filename)
-
-    #open and read files
-    if filepath.is_file():
-        public_keys_file = open(filename)
-        content = ""
-        for line in public_keys_file:
-            content = content + line
-            session_user.public_keys = json.loads(content)
-        public_keys_file.close()
-    else:
-        public_keys_file = open(filename, "w")
-        public_keys_file.close()
-
-def get_private_keys(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_privatekeys.txt"
-    filepath = Path(filename)
-
-    #open files
-    if filepath.is_file():
-        private_keys_file = open(filename)
-        content = ""
-        for line in private_keys_file:
-            content = content + line
-            session_user.private_keys = json.loads(content)
-        private_keys_file.close()
-    else:
-        private_keys_file = open(filename, "w")
-        private_keys_file.close()
 
 def login():
     print("You entered '1': Login\n")
