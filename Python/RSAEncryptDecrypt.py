@@ -1,57 +1,114 @@
-from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.backends import default_backend
+import smtplib
+from email.mime.text import MIMEText
+import sys
 
 
-# paths to public and private RSA keys
-path_to_public = "C:/Users/Ryan/Desktop/public_key.pem"
-path_to_private = "C:/Users/Ryan/Desktop/private_key.pem"
+# Constants for logging in to gmail with SMTP
+SMTP_GMAIL = 'smtp.gmail.com'
+SMTP_PORT = 465
+# Constants for sending the email
+SENDER_EMAIL = "ohchitichatmyself@gmail.com"
+PASSWORD = ""
+RECIPIENT_EMAIL = "ryanpriehl@gmail.com"
 
 
-def rsa_encrypt(plaintext):
-
-    # reading the public key
-    with open(path_to_public, "rb") as key_file:
-        public_key = serialization.load_pem_public_key(
-            key_file.read(),
-            backend=default_backend()
-        )
-
-    # encrypting the plaintext
+# Encrypts the given message with the given public key
+def rsa_encrypt(plaintext, public_key):
     encrypted_text = public_key.encrypt(
         plaintext,
         padding.OAEP(
-            # QUESTION FOR MEHRDAD
-            # What hash should we use here? Does it matter?
-            # I know we shouldn't be using SHA1 anymore, should we just use SHA256 again?
-            mgf=padding.MGF1(algorithm=hashes.SHA1()),
-            algorithm=hashes.SHA1(),
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
             label=None
         )
     )
-
     return encrypted_text
 
 
-def rsa_decrypt(ciphertext):
-
-    # reading the private key
-    with open(path_to_private, "rb") as key_file:
-        private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=None,
-            backend=default_backend()
-        )
-
-    # decrypting the ciphertext
+# Decrypts the given ciphertext with the given private key
+def rsa_decrypt(ciphertext, private_key):
     decrypted_text = private_key.decrypt(
         ciphertext,
         padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA1()),
-            algorithm=hashes.SHA1(),
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
             label=None
         )
     )
-
     return decrypted_text
+
+
+# Generates a new private key
+def generate_private_key():
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+        backend=default_backend()
+    )
+    return private_key
+
+
+# Returns the public key for the given private key
+def get_public_key(private_key):
+    public_key = private_key.public_key()
+    return public_key
+
+
+# Emails the corresponding public key for the given private key
+def send_public_key(private_key):
+    public_key = private_key.public_key()
+
+    pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    pem = pem.decode()
+
+    # prepping the message to be sent by filling in the body, subject, sender, and recipient
+    msg = MIMEText(pem)
+    msg['Subject'] = 'Public Key'
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = RECIPIENT_EMAIL
+
+    server = smtplib.SMTP_SSL(SMTP_GMAIL, SMTP_PORT)
+    server.login(SENDER_EMAIL, PASSWORD)
+
+    server.send_message(msg)
+    server.quit()
+
+
+# Gets the key back into the correct format after being copy/pasted by the user from their email
+def get_key_input():
+    print("Paste the key from the email and hit enter. Then press Ctrl+D: ")
+
+    user_input = sys.stdin.readlines()
+    key = "".join(user_input)
+    key = key.encode()
+
+    public_key = serialization.load_pem_public_key(
+        key,
+        backend=default_backend()
+    )
+    return public_key
+
+
+# Testing that everything works properly
+private_key = generate_private_key()
+send_public_key(private_key)
+
+text = "Ravioli ravioli don't lewd the dragon loli."
+text = text.encode()
+
+public_key = get_key_input()
+cipher = rsa_encrypt(text, public_key)
+print("Ciphertext: ")
+print(cipher)
+
+plain = rsa_decrypt(cipher, private_key)
+plain = plain.decode()
+print("Plaintext: ")
+print(plain)
 
