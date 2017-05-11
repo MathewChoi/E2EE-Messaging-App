@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required
 """
 class User(Resource):
     TABLE_NAME = 'users'
+    DATABASE_NAME = 'data.db'
 
     def __init__(self, **kwargs):
         self.email = kwargs["email"]
@@ -30,7 +31,7 @@ class User(Resource):
     @classmethod
     def find_by_username(cls, username):
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(cls.DATABASE_NAME)
         cursor = connection.cursor()
 
         #obtain the first user with the username
@@ -55,7 +56,7 @@ class User(Resource):
     @classmethod
     def find_by_email(cls, email):
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(cls.DATABASE_NAME)
         cursor = connection.cursor()
 
         #obtain the first user with the email
@@ -80,6 +81,7 @@ class User(Resource):
 
 class UserRegister(Resource):
     TABLE_NAME = 'users'
+    DATABASE_NAME = 'data.db'
 
     parser = reqparse.RequestParser()
     parser.add_argument("email",
@@ -109,13 +111,13 @@ class UserRegister(Resource):
         password = data['password']
 
         if User.find_by_username(username): #check if a user with the same username already exits
-            return {"message": "User with that username already exists. Please enter a new username."}, 400 #406  = not acceptable
+            return {"message": "User with that username already exists. Please enter a new username."}, 401
 
         if User.find_by_email(email): #check if a user with the same email already exists
-            return {"message": "That email is already in use. Please enter a new email address."}, 406 #406  = not acceptable
+            return {"message": "That email is already in use. Please enter a new email address."}, 401
 
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(self.DATABASE_NAME)
         cursor = connection.cursor()
 
         #hash and salt the password
@@ -135,7 +137,7 @@ class UserRegister(Resource):
         connection.commit()
         connection.close()
 
-        return {"message": "User created successfully.", "username": data['username']}, 201 #201 = created
+        return {"message": "User created successfully.", "username": data['username']}, 200
 
 
 '''
@@ -145,33 +147,26 @@ class UserRegister(Resource):
     CLASS IS FOR TESTING PURPOSES ONLY
 '''
 class UserList(Resource):
+    DATABASE_NAME = 'data.db'
     """
         This will return the list of users so we can confirm that the tables have been changed
     """
     def get(self):
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(self.DATABASE_NAME)
         cursor = connection.cursor()
 
         #return the list of users
         query = "SELECT * FROM {}".format("users") #TABLE_NAME
         result = cursor.execute(query)
 
-        #store all users in a dict
-        all_users = {}
-        user_num = 0
+        #store all users in a list
+        all_usernames = []
         for row in result:
-            key = "user_" + str(user_num)
-            all_users[key] = {
-                "email" : row[0],
-                "username" : row[1],
-                "password" : row[2],
-                "salt":row[3]
-            }
-            user_num = user_num + 1
+            all_usernames.append(row[1])
 
         #close connection to database
         connection.close()
 
         #return all user data
-        return {"num_users": user_num, "all_users":all_users}, 200 #200 = OK
+        return {"all usernames":all_usernames}, 200

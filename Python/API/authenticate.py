@@ -51,10 +51,12 @@ class Authenticator(Resource):
         password = data["password"]
 
         user = User.find_by_username(username)
+        if user is None:
+            return {"Message" : "A user with that username does not exist in the system."}
         pass_match = Authenticator.compare_passwords(user, password)
 
         if pass_match is False:
-            return {"Message" : "invalid username or password"}, 401 #401 = unauthorized
+            return {"Message" : "Invalid username or password"}, 401 #401 = unauthorized
 
         #set the JWT cookies in the responses
         resp = {
@@ -70,7 +72,6 @@ class Authenticator(Resource):
     @jwt_refresh_token_required
     def put(self):
         current_user = json.loads(get_jwt_identity())
-
         ret = {
             "access token": create_access_token(identity=current_user)
         }
