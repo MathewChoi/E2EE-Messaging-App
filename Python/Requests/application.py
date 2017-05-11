@@ -76,21 +76,10 @@ def register():
     response = register_user(constants.url, email, username, password)
     print("\nResponse:\n {}".format(response))
 
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    contacted_filename = filepath+username+"_contacts.txt"
-    public_keys_filename = filepath+username+"_publickeys.txt"
-    private_keys_filename = filepath+username+"_privatekeys.txt"
-
-    #create new files
-    contacted_file = open(contacted_filename, "w")
-    public_keys_file = open(public_keys_filename, "w")
-    private_keys_file = open(private_keys_filename, "w")
-
-    #close files
-    contacted_file.close()
-    public_keys_file.close()
-    private_keys_file.close()
+    if ("Please enter" not in response):
+        create_contacts_list(username) #create the contacts list table
+        print("Redirecting you to the login menu...")
+        login() #go to login menu
 
 def get_username_list():
     usernames = json.loads(get_all_users(constants.url))
