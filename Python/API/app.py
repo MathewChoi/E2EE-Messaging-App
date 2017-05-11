@@ -17,6 +17,7 @@ app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
 
 
 api = Api(app)
+app.secret_key = 'super secret key'
 
 '''
     Documentation for flask_jwt_extended: https://flask-jwt-extended.readthedocs.io/en/latest/

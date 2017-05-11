@@ -11,6 +11,7 @@ import json
 """
 class Message(Resource):
     TABLE_NAME = 'messages'
+    DATABASE_NAME = 'data.db'
 
     def __init__(self, sender, ciphertext, receiver):
         self.sender = "sender"
@@ -48,7 +49,7 @@ class Message(Resource):
     @classmethod
     def find_by_receiver(cls, receiver):
         #connects to a database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(cls.DATABASE_NAME)
         cursor = connection.cursor()
 
         #finds a user with the username = receiver
@@ -79,7 +80,7 @@ class Message(Resource):
     @classmethod
     def mark_read(cls, read_messages):
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(cls.DATABASE_NAME)
         cursor = connection.cursor()
 
         #iterate through messages and mark each as read
@@ -97,7 +98,7 @@ class Message(Resource):
     @classmethod
     def delete_read(cls):
         #connect to the database
-        connection = sqlite3.connect('data.db')
+        connection = sqlite3.connect(cls.DATABASE_NAME)
         cursor = connection.cursor()
 
         #delete messages from messages table with the read bit raised
@@ -136,9 +137,9 @@ class Message(Resource):
             connection.commit()
             connection.close()
 
-            return {"message": "message post successfully completed"}, 201
+            return {"message": "message post successfully completed"}, 200
         else:
-            return {"message": "you cannot send a message under a different username."}, 204
+            return {"message": "you cannot send a message under a different username."}, 401
 
 
 class MessageList(Resource):
@@ -155,4 +156,4 @@ class MessageList(Resource):
             Message.mark_read(messages)
             Message.delete_read()
             return {"messages": messages}
-        return {'message':'No new messages for this receiver'}, 204 #204 = no content for user
+        return {'message':'No new messages for this receiver'}
