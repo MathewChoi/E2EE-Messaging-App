@@ -11,7 +11,7 @@ SMTP_GMAIL = 'smtp.gmail.com'
 SMTP_PORT = 465
 # Constants for logging in to the account to send the emails
 SENDER_EMAIL = "ohchitichatmyself@gmail.com"
-PASSWORD = "ilovemehrdad"
+PASSWORD = ""
 
 
 # Encrypts the given message with the given public key
@@ -57,7 +57,7 @@ def get_public_key(private_key):
 
 
 # Emails the corresponding public key for the given private key
-def send_public_key(private_key, email):
+def send_public_key(private_key, email, username):
     public_key = private_key.public_key()
 
     pem = public_key.public_bytes(
@@ -68,7 +68,7 @@ def send_public_key(private_key, email):
 
     # prepping the message to be sent by filling in the body, subject, sender, and recipient
     msg = MIMEText(pem)
-    msg['Subject'] = 'Public Key'
+    msg['Subject'] = '[Oh Chit, I Chat Myself] Public Key from ' + username
     msg['From'] = SENDER_EMAIL
     msg['To'] = email
 
@@ -96,7 +96,7 @@ def get_key_input():
 
 # Tester
 '''private_key = generate_private_key()
-send_public_key(private_key, "ryanpriehl@gmail.com")
+send_public_key(private_key, "ryanpriehl@gmail.com", "bob")
 
 text = "Security is not an afterthought; it starts at design."
 text = text.encode()

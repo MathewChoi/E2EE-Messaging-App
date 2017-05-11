@@ -109,8 +109,8 @@ def decrypt(json_object, private_key):
 
 
 # Tester
-'''private_key = RSAEncryptDecrypt.generate_private_key()
-public_key = RSAEncryptDecrypt.get_public_key(private_key)
+'''private_key = rsa_encrypt_decrypt.generate_private_key()
+public_key = rsa_encrypt_decrypt.get_public_key(private_key)
 json = encrypt("hello", public_key)
 output = decrypt(json, private_key)
 print(output)'''
