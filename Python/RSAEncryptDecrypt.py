@@ -58,7 +58,7 @@ def get_public_key(private_key):
 
 
 # Emails the corresponding public key for the given private key
-def send_public_key(private_key):
+def send_public_key(private_key, email):
     public_key = private_key.public_key()
 
     pem = public_key.public_bytes(
@@ -71,7 +71,7 @@ def send_public_key(private_key):
     msg = MIMEText(pem)
     msg['Subject'] = 'Public Key'
     msg['From'] = SENDER_EMAIL
-    msg['To'] = RECIPIENT_EMAIL
+    msg['To'] = email
 
     server = smtplib.SMTP_SSL(SMTP_GMAIL, SMTP_PORT)
     server.login(SENDER_EMAIL, PASSWORD)
@@ -96,7 +96,7 @@ def get_key_input():
 
 
 # Testing that everything works properly
-private_key = generate_private_key()
+'''private_key = generate_private_key()
 send_public_key(private_key)
 
 text = "Ravioli ravioli don't lewd the dragon loli."
@@ -110,5 +110,5 @@ print(cipher)
 plain = rsa_decrypt(cipher, private_key)
 plain = plain.decode()
 print("Plaintext: ")
-print(plain)
+print(plain)'''
 
