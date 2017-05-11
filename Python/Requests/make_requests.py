@@ -8,13 +8,13 @@ import json
 
 #declare constants... DO NOT CHANGE THE CONTENTS OF THESE VARIABLES
 class constants:
-    #local_url = 'http://127.0.0.1:5000'
-    site_url = 'http://www.mathewchoi.me'
+    url = 'http://127.0.0.1:5000'
+    #url = 'http://www.mathewchoi.me'
 
 def register_user(url, email, username, password):
     #setup the request route
     route = '/register'
-    request_url = constants.site_url + route
+    request_url = constants.url + route
 
     data = {
         'email' : email,
@@ -28,7 +28,7 @@ def register_user(url, email, username, password):
 def auth_user(url, username, password):
     #setup the request route
     route = '/auth'
-    request_url = constants.site_url + route
+    request_url = constants.url + route
 
     data = {
         "username" : username,
@@ -42,7 +42,7 @@ def auth_user(url, username, password):
 def refresh_token(url, refresh_tok):
     #setup the request route
     route = '/auth'
-    request_url = constants.site_url + route
+    request_url = constants.url + route
 
     headers = {
         "Authorization" : "Bearer "+refresh_tok
@@ -54,7 +54,7 @@ def refresh_token(url, refresh_tok):
 def send_message(url, sender, receiver, ciphertext, access_tok):
     #setup the request route
     route = '/message'
-    request_url = constants.site_url + route
+    request_url = constants.url + route
 
     headers = {
         "Authorization" : "Bearer "+access_tok,
@@ -73,7 +73,7 @@ def send_message(url, sender, receiver, ciphertext, access_tok):
 def get_messages(url, receiver, access_tok):
     #setup the request route
     route = '/message/'
-    request_url = constants.site_url + route + str(receiver)
+    request_url = constants.url + route + str(receiver)
 
     headers = {
         "Authorization" : "Bearer "+access_tok
@@ -89,14 +89,14 @@ def get_messages(url, receiver, access_tok):
 """
 def get_all_users(url):
     route = '/users'
-    request_url = constants.site_url + route
+    request_url = constants.url + route
 
     response = requests.get(request_url)
-
+    print ("get_all_users respons = {}".format(response.text))
     return response.text
 
 """
     Test Driver
 """
-response_text = register_user(constants.site_url, "mathew.m.choi@gmail.com", "Mathew", "Choi")
-print("response_text = {}".format(response_text))
+#response_text = register_user(constants.url, "mathew.m.choi@gmail.com", "Mathew", "Choi")
+#print("response_text = {}".format(response_text))

@@ -1,3 +1,4 @@
+from contacts import get_contacted_users, get_public_keys, get_private_keys, add_contact, create_contacts_list
 from make_requests import auth_user, register_user, refresh_token, send_message, get_messages, get_all_users, constants
 from pathlib import Path
 from cryptography.hazmat.backends import default_backend
@@ -40,58 +41,6 @@ def login_register():
         else:
             print("Invalid input. Please enter 1, 2, or 3.\n")
 
-def get_contacted_users(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_contacts.txt"
-    filepath = Path(filename)
-
-    #open and read files
-    if filepath.is_file():
-        contacted_file = open(filename)
-        for line in contacted_file:
-            session_user.contacted_users.append(line)
-        contacted_file.close()
-    else:
-        contacted_file = open(filename, "w")
-        contacted_file.close()
-
-def get_public_keys(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_publickeys.txt"
-    filepath = Path(filename)
-
-    #open and read files
-    if filepath.is_file():
-        public_keys_file = open(filename)
-        content = ""
-        for line in public_keys_file:
-            content = content + line
-            session_user.public_keys = json.loads(content)
-        public_keys_file.close()
-    else:
-        public_keys_file = open(filename, "w")
-        public_keys_file.close()
-
-def get_private_keys(username):
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    filename = filepath+username+"_privatekeys.txt"
-    filepath = Path(filename)
-
-    #open files
-    if filepath.is_file():
-        private_keys_file = open(filename)
-        content = ""
-        for line in private_keys_file:
-            content = content + line
-            session_user.private_keys = json.loads(content)
-        private_keys_file.close()
-    else:
-        private_keys_file = open(filename, "w")
-        private_keys_file.close()
-
 def login():
     print("You entered '1': Login\n")
     print("Enter username: ")
@@ -127,21 +76,10 @@ def register():
     response = register_user(constants.url, email, username, password)
     print("\nResponse:\n {}".format(response))
 
-    #storage file variables
-    filepath = "//home//mathew//Desktop//CECS478//phase4//clientside//files//"
-    contacted_filename = filepath+username+"_contacts.txt"
-    public_keys_filename = filepath+username+"_publickeys.txt"
-    private_keys_filename = filepath+username+"_privatekeys.txt"
-
-    #create new files
-    contacted_file = open(contacted_filename, "w")
-    public_keys_file = open(public_keys_filename, "w")
-    private_keys_file = open(private_keys_filename, "w")
-
-    #close files
-    contacted_file.close()
-    public_keys_file.close()
-    private_keys_file.close()
+    if ("Please enter" not in response):
+        create_contacts_list(username) #create the contacts list table
+        print("Redirecting you to the login menu...")
+        login() #go to login menu
 
 def get_username_list():
     usernames = json.loads(get_all_users(constants.url))
@@ -156,6 +94,7 @@ def chatroom_menu():
         print("Select an option:")
         print("1. Send a message")
         print("2. Get messages")
+        print("3. Add new contact")
         print("3. Quit")
 
         choice = input()
