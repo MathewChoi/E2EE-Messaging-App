@@ -161,12 +161,16 @@ class UserList(Resource):
         result = cursor.execute(query)
 
         #store all users in a list
-        all_usernames = []
+        all_contacts = []
         for row in result:
-            all_usernames.append(row[1])
-
+            contact = {}
+            email = row[0]
+            username = row[1]
+            contact['email'] = email
+            contact['username'] = username
+            all_contacts.append(contact)
         #close connection to database
         connection.close()
 
         #return all user data
-        return {"all usernames":all_usernames}, 200
+        return {"all usernames":all_contacts}, 200
