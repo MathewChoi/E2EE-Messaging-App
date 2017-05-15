@@ -20,6 +20,8 @@ def get_contacted_users(username):
     connection = sqlite3.connect(DATABASE_NAME)
     cursor = connection.cursor()
 
+    create_contacts_list(username)
+
     get_contacted = "SELECT contact from contacts"
     result = cursor.execute(get_contacted)
 
@@ -75,20 +77,44 @@ def get_private_keys(username):
 
     return priv_keys
 
-def add_contact(username, contact, public_key, private_key):
+def add_contact(username, contact):
     DATABASE_NAME = username+'_contacts.db'
     print("database name = {}".format(DATABASE_NAME))
 
     connection = sqlite3.connect(DATABASE_NAME)
     cursor = connection.cursor()
 
-    add_contact_info = "INSERT INTO contacts (contact, public_key, private_key) VALUES (?,?,?)"
-    cursor.execute(add_contact_info, (contact, public_key, private_key))
+    add_contact_info = "INSERT INTO contacts (contact) VALUES (?)"
+    cursor.execute(add_contact_info, (contact,))
 
     connection.commit()
     connection.close()
 
+def change_priv_keys(username, contact, new_priv_keys):
+    DATABASE_NAME = username+'_contacts.db'
+    print("database name = {}".format(DATABASE_NAME))
 
+    connection = sqlite3.connect(DATABASE_NAME)
+    cursor = connection.cursor()
+
+    add_contact_info = "UPDATE contacts set private_key = ? WHERE contact = ?"
+    cursor.execute(add_contact_info, (new_priv_keys, contact))
+
+    connection.commit()
+    connection.close()
+
+def change_pub_keys(username, contact, new_pub_keys):
+    DATABASE_NAME = username+'_contacts.db'
+    print("database name = {}".format(DATABASE_NAME))
+
+    connection = sqlite3.connect(DATABASE_NAME)
+    cursor = connection.cursor()
+
+    add_contact_info = "UPDATE contacts set public_key = ? WHERE contact = ?"
+    cursor.execute(add_contact_info, (new_pub_keys, contact))
+
+    connection.commit()
+    connection.close()
 """
     Driver
 

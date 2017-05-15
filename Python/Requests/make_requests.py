@@ -65,7 +65,7 @@ def send_message(url, sender, receiver, ciphertext, access_tok):
         "receiver" : receiver,
         "ciphertext" : ciphertext
     }
-    print("data = {}".format(data))
+    #print("data = {}".format(data))
     response = requests.post(request_url, headers=headers, data=json.dumps(data))
 
     return response.text
@@ -92,7 +92,7 @@ def get_all_users(url):
     request_url = constants.url + route
 
     response = requests.get(request_url)
-    print ("get_all_users respons = {}".format(response.text))
+    #print ("get_all_users response = {}".format(response.text))
     return response.text
 
 """

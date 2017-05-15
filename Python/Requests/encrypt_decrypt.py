@@ -2,7 +2,11 @@ import json
 import os
 import hmac
 import hashlib
-import rsa_encrypt_decrypt
+import RSAEncryptDecrypt
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
@@ -53,7 +57,14 @@ def encrypt(message, public_key):
 
     # concatenating AES key, HMAC key, and IV then RSA encrypting
     keys = aes_key + hmac_key + iv
-    encrypted_keys = rsa_encrypt_decrypt.rsa_encrypt(keys, public_key)
+
+    pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    pem = pem.decode()
+
+    encrypted_keys = RSAEncryptDecrypt.rsa_encrypt(keys, pem)
 
     # packaging and outputting the encrypted message, encrypted keys, and HMAC tag
     # latin1 is used for encoding because json requires a string and latin1 can translate every byte
@@ -72,7 +83,7 @@ def decrypt(json_object, private_key):
     tag = bytes(json_object[2], encoding='latin1')
 
     # RSA decrypting the keys
-    keys = rsa_encrypt_decrypt.rsa_decrypt(encrypted_keys, private_key)
+    keys = RSAEncryptDecrypt.rsa_decrypt(encrypted_keys, private_key)
 
     # separating the AES and HMAC keys and IV back out
     aes_key = keys[0 : AES_KEY_SIZE]
@@ -109,8 +120,8 @@ def decrypt(json_object, private_key):
 
 
 # Tester
-'''private_key = rsa_encrypt_decrypt.generate_private_key()
-public_key = rsa_encrypt_decrypt.get_public_key(private_key)
+'''private_key = RSAEncryptDecrypt.generate_private_key()
+public_key = RSAEncryptDecrypt.get_public_key(private_key)
 json = encrypt("hello", public_key)
 output = decrypt(json, private_key)
 print(output)'''
